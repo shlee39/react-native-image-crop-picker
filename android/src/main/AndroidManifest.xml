@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.reactnative.ivpusic.imagepicker">
+    package="com.reactnative.ivpusic.imagepicker"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
 
     <queries>
         <intent>
@@ -15,10 +17,13 @@
             android:name=".IvpusicImagePickerFileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities"
+            >
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/ivpusic_imagepicker_provider_paths" />
+                android:resource="@xml/ivpusic_imagepicker_provider_paths" 
+                tools:replace="android:resource" />
         </provider>
 
         <activity

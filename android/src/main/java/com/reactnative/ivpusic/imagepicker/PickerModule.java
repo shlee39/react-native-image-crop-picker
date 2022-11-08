@@ -754,8 +754,27 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
             configureCropperColors(options);
         }
 
+        Bitmap bitmap = null;
+
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(this.reactContext.getContentResolver(), uri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int bitmapSize = bitmap.getByteCount();
+        Uri bitmapUri = null;
+
+        // 100M 이상일때 resizing
+        if (bitmapSize > 100 * 1024 * 1024) {
+            Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 2, bitmap.getHeight() / 2, false);
+            bitmapUri = getImageUri(resizedBitmap);
+        } else {
+            bitmapUri = uri;
+        }
+
         UCrop uCrop = UCrop
-                .of(uri, Uri.fromFile(new File(this.getTmpDir(activity), UUID.randomUUID().toString() + ".jpg")))
+                .of(bitmapUri, Uri.fromFile(new File(this.getTmpDir(activity), UUID.randomUUID().toString() + ".jpg")))
                 .withOptions(options);
 
         if (width > 0 && height > 0) {
@@ -763,6 +782,13 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
         }
 
         uCrop.start(activity);
+    }
+
+    private Uri getImageUri(Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(this.reactContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
     private void imagePickerResult(Activity activity, final int requestCode, final int resultCode, final Intent data) {
